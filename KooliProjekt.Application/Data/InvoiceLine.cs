@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace KooliProjekt.Application.Data
+{
+    public class InvoiceLine
+    {
+        public int invoice_line_id { get; set; }
+
+        public int invoice_id { get; set; }
+
+        public string description { get; set; } = string.Empty;
+
+        public decimal quantity { get; set; }
+
+        public decimal unit_price { get; set; }
+
+        public Decimal amount { get; set; }
+    }
+}
