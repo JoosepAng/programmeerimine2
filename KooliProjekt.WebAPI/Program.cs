@@ -53,6 +53,20 @@ namespace KooliProjekt.WebAPI
 
             app.MapControllers();
 
+            
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                db.Database.Migrate();
+
+#if (DEBUG)      
+                SeedData.Generate(db);
+
+#endif
+
+            }
             app.Run();
         }
     }
