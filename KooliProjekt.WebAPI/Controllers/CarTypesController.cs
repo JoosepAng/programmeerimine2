@@ -1,9 +1,10 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
+using KooliProjekt.Application.Features.Cars;
 using KooliProjekt.Application.Features.CarTypes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace KooliProjekt.WebAPI.Controllers
 {
@@ -17,9 +18,16 @@ namespace KooliProjekt.WebAPI.Controllers
         }
 
         [HttpGet("List")]
-        public async Task<IEnumerable<CarType>> List()
+        public async Task<IActionResult> List(int page = 1, int pageSize = 10)
         {
-            return await _mediator.Send(new ListCarTypesQuery());
+            var query = new ListCarTypesQuery
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+            return Result(result);
         }
 
         [HttpGet("Get/{id:int}")]
@@ -30,14 +38,30 @@ namespace KooliProjekt.WebAPI.Controllers
                 return NotFound();
             }
 
-            var carType = await _mediator.Send(new GetCarTypeQuery { Id = id });
+            var query = new GetCarTypeQuery { Id = id };
+            var result = await _mediator.Send(query);
 
-            if (carType == null)
+            return Result(result);
+        }
+
+        [HttpPost("Save")]
+        public async Task<IActionResult> Save(SaveCarTypeCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Result(result);
+        }
+
+        [HttpDelete("Delete/{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id <= 0)
             {
                 return NotFound();
             }
 
-            return Ok(carType);
+            var command = new DeleteCarTypeCommand { Id = id };
+            var result = await _mediator.Send(command);
+            return Result(result);
         }
     }
 }

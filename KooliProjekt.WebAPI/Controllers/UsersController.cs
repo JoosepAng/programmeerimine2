@@ -1,9 +1,10 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
+using KooliProjekt.Application.Features.InvoiceLines;
 using KooliProjekt.Application.Features.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace KooliProjekt.WebAPI.Controllers
 {
@@ -17,9 +18,16 @@ namespace KooliProjekt.WebAPI.Controllers
         }
 
         [HttpGet("List")]
-        public async Task<IEnumerable<User>> List()
+        public async Task<IActionResult> List(int page = 1, int pageSize = 10)
         {
-            return await _mediator.Send(new ListUsersQuery());
+            var query = new ListUsersQuery
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+            return Result(result);
         }
 
         [HttpGet("Get/{id:int}")]
@@ -30,14 +38,29 @@ namespace KooliProjekt.WebAPI.Controllers
                 return NotFound();
             }
 
-            var user = await _mediator.Send(new GetUserQuery { Id = id });
+            var query = new GetUserQuery { Id = id };
+            var result = await _mediator.Send(query);
 
-            if (user == null)
+            return Result(result);
+        }
+
+        [HttpPost("Save")]
+        public async Task<IActionResult> Save(SaveUserCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Result(result);
+        }
+
+        [HttpDelete("Delete/{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id <= 0)
             {
                 return NotFound();
             }
 
-            return Ok(user);
+            var result = await _mediator.Send(new DeleteUserCommand { Id = id });
+            return Result(result);
         }
     }
 }

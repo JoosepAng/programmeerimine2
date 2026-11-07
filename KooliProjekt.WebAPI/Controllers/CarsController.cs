@@ -17,9 +17,16 @@ namespace KooliProjekt.WebAPI.Controllers
         }
 
         [HttpGet("List")]
-        public async Task<IEnumerable<Car>> List()
+        public async Task<IActionResult> List(int page = 1, int pageSize = 10)
         {
-            return await _mediator.Send(new ListCarsQuery());
+            var query = new ListCarsQuery
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+            return Result(result);
         }
 
         [HttpGet("Get/{id:int}")]
@@ -30,14 +37,29 @@ namespace KooliProjekt.WebAPI.Controllers
                 return NotFound();
             }
 
-            var car = await _mediator.Send(new GetCarQuery { Id = id });
+            var query = new GetCarQuery { Id = id };
+            var result = await _mediator.Send(query);
 
-            if (car == null)
+            return Result(result);
+        }
+
+        [HttpPost("Save")]
+        public async Task<IActionResult> Save(SaveCarCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Result(result);
+        }
+
+        [HttpDelete("Delete/{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id <= 0)
             {
                 return NotFound();
             }
 
-            return Ok(car);
+            var result = await _mediator.Send(new DeleteCarCommand { Id = id });
+            return Result(result);
         }
     }
 }

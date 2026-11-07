@@ -91,14 +91,20 @@ namespace KooliProjekt.Application.Data
             };
 
             var cars = new List<Car>();
-
             for (var i = 1; i <= 35; i++)
             {
                 var car = makesAndModels[(i - 1) % makesAndModels.Length];
 
+                var plateNumber = 100 + i;
+                var lettersIndex = i + 27;
+                var letters =
+                    $"{(char)('A' + lettersIndex / 676)}" +
+                    $"{(char)('A' + (lettersIndex / 26) % 26)}" +
+                    $"{(char)('A' + lettersIndex % 26)}";
+
                 cars.Add(new Car
                 {
-                    registration_no = $"123 {i:000}",
+                    registration_no = $"{plateNumber:000} {letters}",
                     make = car.Item1,
                     model = car.Item2,
                     car_type_id = carTypes[(i - 1) % carTypes.Count].car_type_id,
@@ -115,14 +121,20 @@ namespace KooliProjekt.Application.Data
 
             for (var i = 1; i <= 35; i++)
             {
-                var start = DateTime.UtcNow.Date.AddDays(-i * 2);
+                var start = DateTime.UtcNow.Date
+                    .AddDays(-i * 2)
+                    .AddHours(9);
+
+                var end = start.Date
+                    .AddDays(2 + (i % 5))
+                    .AddHours(18);
 
                 bookings.Add(new Booking
                 {
                     user_id = users[i - 1].user_id,
                     car_id = cars[i - 1].car_id,
                     start_time = start,
-                    end_time = start.AddDays(2 + (i % 5)),
+                    end_time = end,
                     starting_odometer = 12000m + i * 850m,
                     ending_odometer = 12300m + i * 850m,
                     time_rate_at_booking = 25m + (i % 6) * 5m,

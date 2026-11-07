@@ -1,9 +1,11 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
+using KooliProjekt.Application.Features.Bookings;
+using KooliProjekt.Application.Features.Cars;
 using KooliProjekt.Application.Features.Invoices;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace KooliProjekt.WebAPI.Controllers
 {
@@ -17,9 +19,16 @@ namespace KooliProjekt.WebAPI.Controllers
         }
 
         [HttpGet("List")]
-        public async Task<IEnumerable<Invoice>> List()
+        public async Task<IActionResult> List(int page = 1, int pageSize = 10)
         {
-            return await _mediator.Send(new ListInvoicesQuery());
+            var query = new ListInvoicesQuery
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+
+            var result = await _mediator.Send(query);
+            return Result(result);
         }
 
         [HttpGet("Get/{id:int}")]
@@ -30,14 +39,29 @@ namespace KooliProjekt.WebAPI.Controllers
                 return NotFound();
             }
 
-            var invoice = await _mediator.Send(new GetInvoiceQuery { Id = id });
+            var query = new GetInvoiceQuery { Id = id };
+            var result = await _mediator.Send(query);
 
-            if (invoice == null)
+            return Result(result);
+        }
+
+        [HttpPost("Save")]
+        public async Task<IActionResult> Save(SaveInvoiceCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Result(result);
+        }
+
+        [HttpDelete("Delete/{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id <= 0)
             {
                 return NotFound();
             }
 
-            return Ok(invoice);
+            var result = await _mediator.Send(new DeleteInvoiceCommand { Id = id });
+            return Result(result);
         }
     }
 }
